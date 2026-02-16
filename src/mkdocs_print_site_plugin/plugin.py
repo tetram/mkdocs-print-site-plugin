@@ -384,6 +384,13 @@ class PrintSitePlugin(BasePlugin):
         if config.get("plugins", {}).get("drawio"):
             html = config.get("plugins", {}).get("drawio").render_drawio_diagrams(html, page)
 
+        # Compatibility with mkdocs-excalidraw
+        # As this plugin adds javascript in head block. This rendering happens
+        # in the on_post_page event, which is skipped by this plugin
+        # therefore we need to manual execute the excalidraw plugin renderer here.
+        if config.get("plugins", {}).get("excalidraw"):
+            html = config.get("plugins", {}).get("excalidraw").on_post_page(html, page=page, config=config)
+
         # Compatibility with mkdocs-autorefs
         # As this plugin processes cross-references in the on_env event, 
         # which happens after the print page is generated, it's necessary to 

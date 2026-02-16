@@ -194,6 +194,17 @@ def fix_tabbed_content(page_html, page_key):
 
     return page_html
 
+# NOTE: could be nice to run it only if plugin is activated
+def fix_excalidraw_src(page_html, page_url, directory_urls):
+    """
+    Update excalidraw-renderer src path in print page.
+    This is because flattening all pages into 1 print page will break any relative links.
+    """
+    # Loop over all excalidraw-renderer src attributes
+    img_regex = re.compile(r"<excalidraw-renderer[^>]+src=\"([^\">]+)\"", flags=re.IGNORECASE)
+    matches = re.finditer(img_regex, page_html)
+
+    return fix_src(page_html, page_url, directory_urls, matches)
 
 def fix_image_src(page_html, page_url, directory_urls):
     """
@@ -206,6 +217,9 @@ def fix_image_src(page_html, page_url, directory_urls):
     img_regex = re.compile(r"<img[^>]+src=\"([^\">]+)\"", flags=re.IGNORECASE)
     matches = re.finditer(img_regex, page_html)
 
+    return fix_src(page_html, page_url, directory_urls, matches)
+
+def fix_src(page_html, page_url, directory_urls, matches):
     for m in matches:
         img_src = m.group(1)
         if is_external(img_src):
@@ -228,7 +242,7 @@ def fix_image_src(page_html, page_url, directory_urls):
 
         page_html = page_html.replace(img_text, new_text)
 
-    return page_html
+    return page_html        
 
 
 def get_url_from_root(target_link, current_page_url):
@@ -269,6 +283,7 @@ def fix_internal_links(page_html, page_url, directory_urls, heading_number):
         page_html = update_anchor_ids(page_html, page_key)
         page_html = fix_tabbed_content(page_html, page_key)
         page_html = fix_image_src(page_html, page_url, directory_urls)
+        page_html = fix_excalidraw_src(page_html, page_url, directory_urls)
     except:
         print(f"Could not fix page '{page_url}', please report an issue on github")
         raise

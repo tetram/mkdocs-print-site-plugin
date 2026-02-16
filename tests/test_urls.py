@@ -1,12 +1,13 @@
 import pytest
 
 from mkdocs_print_site_plugin.urls import (
+    fix_excalidraw_src,
     fix_href_links,
-    update_anchor_ids,
     fix_image_src,
     get_page_key,
-    is_external,
     is_attachment,
+    is_external,
+    update_anchor_ids,
 )
 
 
@@ -175,3 +176,36 @@ def test_fix_image_src():
 
     result = '<img src="../../appendix/table.png">'
     assert fix_image_src(html, "this_page", True) == result
+
+def test_fix_excalidraw_src():
+    """
+    Test fixing excalidraw source.
+    """
+    # Make sure no changes are made
+
+    html = '<h1><a href="page.html#anchor-link">the link</a></h1>'
+    assert fix_excalidraw_src(html, "this_page", True) == html
+
+    html = '<a href="test"'
+    assert fix_excalidraw_src(html, "this_page", True) == html
+
+    html = '<li><a href="a/">page a</a></li><li><a href="z/">page z</a></li>'
+    assert fix_excalidraw_src(html, "this_page", True) == html
+
+    html = '<li><a class = "bla" href="z/">page z</a></li>'
+    assert fix_excalidraw_src(html, "this_page", True) == html
+
+    html = "<td>Wraps the hero teaser (if available)</td>\n</tr>\n<tr>\n<td><code>htmltitle</code></td>\n<td>Wraps the <code><title></code> tag</td>\n</tr>\n<tr>\n<td><code>libs</code></td>\n<td>Wraps"  # noqa
+    assert fix_excalidraw_src(html, "this_page", True) == html
+
+    # Make sure absolute urls stay intact
+    html = '<excalidraw-renderer src="/img.excalidraw">'
+    assert fix_excalidraw_src(html, "this_page", False) == html
+    
+    # Make sure changes are made
+    html = '<excalidraw-renderer src="../appendix/table.excalidraw">'
+    result = '<excalidraw-renderer src="../appendix/table.excalidraw">'
+    assert fix_excalidraw_src(html, "this_page", False) == result
+
+    result = '<excalidraw-renderer src="../../appendix/table.excalidraw">'
+    assert fix_excalidraw_src(html, "this_page", True) == result
