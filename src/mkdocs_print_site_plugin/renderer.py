@@ -136,6 +136,9 @@ class Renderer(object):
                             tags_html += "</nav>"
                             item_html = tags_html + item_html
 
+                        # Remove item head bloc
+                        item_html = re.sub("<head>.*</head>", "", item_html)
+
                         # Update internal anchor links, image urls, etc
                         items_html += fix_internal_links(
                             item_html, item.url, directory_urls=dir_urls, heading_number=my_prefix
