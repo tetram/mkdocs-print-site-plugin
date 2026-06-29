@@ -398,6 +398,12 @@ class PrintSitePlugin(BasePlugin):
         if config.get("plugins", {}).get("plantuml"):
             html = config.get("plugins", {}).get("plantuml").on_post_page(html, page=page, config=config)
 
+        # Compatiblity with mkdocs-chart-plugin
+        # As this plugin adds some javascript to every page
+        # It should be included in the print site also
+        if config.get("plugins", {}).get("mermaid2"):
+            html = config.get("plugins", {}).get("mermaid2").on_post_page(html, config, page)
+
         # Compatibility with mkdocs-autorefs
         # As this plugin processes cross-references in the on_env event, 
         # which happens after the print page is generated, it's necessary to 
